@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var pixi_js_1 = require("pixi.js");
+import { autoDetectRenderer } from 'pixi.js';
 var Core = /** @class */ (function () {
     function Core(option) {
         var element = option.element, width = option.width, height = option.height;
@@ -10,13 +8,22 @@ var Core = /** @class */ (function () {
         this.init();
     }
     Core.prototype.init = function () {
+        this.renderer = null;
+        this.createRender();
+    };
+    Core.prototype.createRender = function () {
         var box = document.querySelector("#" + this.element);
-        var App = new pixi_js_1.Application({ width: this.width, height: this.height });
-        box === null || box === void 0 ? void 0 : box.appendChild(App.view);
-        // box?.setAttribute('width',this.width as string);
-        // box?.setAttribute('height',this.height as string);
+        // let App = new Application({width:this.width as number,height:this.height as number});
+        this.renderer = autoDetectRenderer({ width: this.width, height: this.height, backgroundColor: 0x000000 });
+        box === null || box === void 0 ? void 0 : box.appendChild(this.renderer.view);
     };
     Core.prototype.createdShe = function () {
+        console.log('created stage');
     };
     return Core;
 }());
+var tanchishe = new Core({
+    element: 'container',
+    width: '600',
+    height: '400'
+});

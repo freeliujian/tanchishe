@@ -1,4 +1,5 @@
 {
+  "outDir": "./dist",
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "moduleResolution":"Node",
@@ -7,5 +8,5 @@
     "target": "es5",
     "allowJs": true
   },
-  "files": ["src/index.ts"]
+  "files": ["src/index.ts","index.d.ts"]
 }

@@ -533,7 +533,7 @@ eval("\n\nexports.decode = exports.parse = __webpack_require__(/*! ./decode */ \
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var pixi_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pixi.js */ \"./node_modules/pixi.js/dist/esm/pixi.js\");\n\r\nvar Core = /** @class */ (function () {\r\n    function Core(option) {\r\n        var element = option.element, width = option.width, height = option.height;\r\n        this.element = element;\r\n        this.width = width;\r\n        this.height = height;\r\n        this.init();\r\n    }\r\n    Core.prototype.init = function () {\r\n        this.renderer = null;\r\n        this.createRender();\r\n    };\r\n    Core.prototype.createRender = function () {\r\n        var box = document.querySelector(\"#\".concat(this.element));\r\n        // let App = new Application({width:this.width as number,height:this.height as number});\r\n        this.renderer = (0,pixi_js__WEBPACK_IMPORTED_MODULE_0__.autoDetectRenderer)({ width: this.width, height: this.height, backgroundColor: 0x000000 });\r\n        box === null || box === void 0 ? void 0 : box.appendChild(this.renderer.view);\r\n    };\r\n    Core.prototype.createdShe = function () {\r\n        console.log('created stage');\r\n    };\r\n    return Core;\r\n}());\r\nvar tanchishe = new Core({\r\n    element: 'container',\r\n    width: '600',\r\n    height: '400'\r\n});\r\n\n\n//# sourceURL=webpack://my-webpack-project/./src/index.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var pixi_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pixi.js */ \"./node_modules/pixi.js/dist/esm/pixi.js\");\n/* harmony import */ var _assets_apple_jpg__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./assets/apple.jpg */ \"./src/assets/apple.jpg\");\n\r\n\r\nvar Core = /** @class */ (function () {\r\n    function Core(option) {\r\n        var element = option.element, width = option.width, height = option.height, _a = option.isLoader, isLoader = _a === void 0 ? false : _a;\r\n        this.element = element;\r\n        this.width = width;\r\n        this.height = height;\r\n        this.isLoader = isLoader;\r\n        this.speed = null;\r\n        this.init();\r\n    }\r\n    Core.prototype.init = function () {\r\n        this.renderer = null;\r\n        this.container = null;\r\n        this.food = null;\r\n        this.speed = 1;\r\n        this.createRender();\r\n    };\r\n    Core.prototype.loaderImg = function (option) {\r\n        var imgUrl = option.imgUrl, loaded = option.loaded;\r\n        this.loader = pixi_js__WEBPACK_IMPORTED_MODULE_0__.Loader.shared;\r\n        this.loader.add('apple', imgUrl).load(loaded);\r\n    };\r\n    Core.prototype.createRender = function () {\r\n        var box = document.querySelector(\"#\".concat(this.element));\r\n        this.renderer = new pixi_js__WEBPACK_IMPORTED_MODULE_0__.Application({ width: this.width, height: this.height, backgroundColor: 0xffffff });\r\n        box === null || box === void 0 ? void 0 : box.appendChild(this.renderer.view);\r\n        this.createApple();\r\n        this.createShetou();\r\n    };\r\n    Core.prototype.createdSheTou = function () {\r\n        console.log('created stage');\r\n    };\r\n    Core.prototype.createApple = function () {\r\n        var container = new pixi_js__WEBPACK_IMPORTED_MODULE_0__.Container();\r\n        this.renderer.stage.addChild(container);\r\n        var apple = pixi_js__WEBPACK_IMPORTED_MODULE_0__.Sprite.from(_assets_apple_jpg__WEBPACK_IMPORTED_MODULE_1__);\r\n        apple.width = 25;\r\n        apple.height = 30;\r\n        apple.x = 0;\r\n        apple.y = 600;\r\n        container.addChild(apple);\r\n    };\r\n    Core.prototype.createShetou = function () {\r\n        var that = this;\r\n        var container = new pixi_js__WEBPACK_IMPORTED_MODULE_0__.Container();\r\n        this.renderer.stage.addChild(container);\r\n        var shetou = pixi_js__WEBPACK_IMPORTED_MODULE_0__.Sprite.from(_assets_apple_jpg__WEBPACK_IMPORTED_MODULE_1__);\r\n        shetou.width = 25;\r\n        shetou.height = 30;\r\n        shetou.x = 0;\r\n        shetou.y = 20;\r\n        container.addChild(shetou);\r\n        this.renderer.ticker.add(function (delta) {\r\n            that.speed += delta;\r\n            shetou.x = that.speed;\r\n        });\r\n    };\r\n    return Core;\r\n}());\r\nvar tanchishe = new Core({\r\n    element: 'container',\r\n    width: '1000',\r\n    height: '1200',\r\n});\r\n\n\n//# sourceURL=webpack://my-webpack-project/./src/index.ts?");
 
 /***/ }),
 
@@ -566,6 +566,17 @@ eval("// Copyright Joyent, Inc. and other Node contributors.\n//\n// Permission 
 
 "use strict";
 eval("\n\nmodule.exports = {\n  isString: function(arg) {\n    return typeof(arg) === 'string';\n  },\n  isObject: function(arg) {\n    return typeof(arg) === 'object' && arg !== null;\n  },\n  isNull: function(arg) {\n    return arg === null;\n  },\n  isNullOrUndefined: function(arg) {\n    return arg == null;\n  }\n};\n\n\n//# sourceURL=webpack://my-webpack-project/./node_modules/url/util.js?");
+
+/***/ }),
+
+/***/ "./src/assets/apple.jpg":
+/*!******************************!*\
+  !*** ./src/assets/apple.jpg ***!
+  \******************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+eval("module.exports = __webpack_require__.p + \"48b6de6c86adb0520373.jpg\";\n\n//# sourceURL=webpack://my-webpack-project/./src/assets/apple.jpg?");
 
 /***/ })
 
@@ -658,6 +669,26 @@ eval("\n\nmodule.exports = {\n  isString: function(arg) {\n    return typeof(arg
 /******/ 			if (!module.children) module.children = [];
 /******/ 			return module;
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript)
+/******/ 				scriptUrl = document.currentScript.src
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName("script");
+/******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
+/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /************************************************************************/
