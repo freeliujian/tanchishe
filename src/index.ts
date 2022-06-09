@@ -1,4 +1,5 @@
 import {AbstractRenderer, Application, autoDetectRenderer, Container, Sprite, Loader,Graphics} from 'pixi.js'
+import {Shetou , ShetouProps} from './shetou';
 import Apple from './assets/apple.jpg'
 
 
@@ -21,6 +22,8 @@ class Core {
   loader!:any
   isLoader?:boolean
   speed:number
+  state: any;
+  shetou:ShetouProps;
   constructor(option:CoreProps){
     const {element,width,height,isLoader = false} = option
 
@@ -30,6 +33,8 @@ class Core {
     this.isLoader =isLoader;
     this.speed = null;
     this.init();
+    this.state = this.play
+    this.shetou = null;
   }
 
   init(){
@@ -50,7 +55,9 @@ class Core {
 
   createRender () {
     const box = document.querySelector(`#${this.element}`);
+    //this.renderer = autoDetectRenderer({width:this.width as number , height:this.height as number ,backgroundColor:0xffffff})
     this.renderer = new Application({width:this.width as number,height:this.height as number,backgroundColor:0xffffff});
+    this.renderer.ticker.add((delta: any) => this.gameLoop(delta));
     box?.appendChild(this.renderer.view);
     this.createApple();
     this.createShetou();
@@ -66,31 +73,21 @@ class Core {
     apple.width = 25;
     apple.height = 30;
     apple.x = 0;
-    apple.y = 600
+    apple.y = 600;
     container.addChild(apple);
 
   }
 
   createShetou(){
-    const that = this;
-    const container =new Container();
-    this.renderer.stage.addChild(container);
-    const shetou = Sprite.from(Apple);
-    shetou.width = 25;
-    shetou.height = 30;
-    shetou.x = 0;
-    shetou.y = 20;
-    container.addChild(shetou);
-
-    this.renderer.ticker.add((delta: any) => {
-
-      that.speed += delta;
-
-      shetou.x = that.speed
-    });
-
+    this.shetou = new Shetou({width:25,height:30,parent:this.renderer});
   }
 
+  gameLoop(delta:any){
+    this.state(delta);
+  }
+  play(delta:any){
+    this.shetou.x += this.speed
+  }
 
 }
 
