@@ -23,7 +23,7 @@ class Shetou {
 
   constructor(option:ShetouProps){
     const {width,height,parent} = option
-
+    console.log(1)
     this.width = width;
     this.height = height;
     this.parent = parent;
@@ -31,8 +31,10 @@ class Shetou {
   }
 
   init(){
-    
+    this.x = null;
+    this.y = null;
     this.createShetou();
+
   }
 
   createShetou(){
@@ -44,7 +46,7 @@ class Shetou {
     shetou.height = this.height as number
     shetou.x = this.x;
     shetou.y = this.y;
- 
+
     container.addChild(shetou);
 
   }
