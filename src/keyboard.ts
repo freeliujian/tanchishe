@@ -44,7 +44,7 @@ const keyboard = (value:string) => {
       window.removeEventListener("keyup", upListener);
     }
   };
-  console.log(value);
+
   const downListener = key.downHandler.bind(key);
   const upListener = key.upHandler.bind(key);
   
