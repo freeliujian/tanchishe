@@ -18,6 +18,11 @@ interface CoreProps {
   isLoader?: boolean;
 }
 
+interface SpeedProps {
+  speedX?:number
+  speedY?:number
+}
+
 class Core {
   element: string;
   width: string | number;
@@ -28,7 +33,7 @@ class Core {
   container!: any;
   loader!: any;
   isLoader?: boolean;
-  speed: {};
+  speed: SpeedProps;
   state: any;
   shetou: any;
   constructor(option: CoreProps) {
@@ -42,6 +47,7 @@ class Core {
   }
 
   init() {
+    console.log('init');
     this.renderer = null;
     this.container = null;
     this.food = null;
@@ -69,7 +75,7 @@ class Core {
       height: this.height as number,
       backgroundColor: 0xffffff,
     });
-    this.renderer.ticker.add((delta: any) => this.gameLoop(delta));
+
     box?.appendChild(this.renderer.view);
     this.createApple();
     this.createShetou();
@@ -90,7 +96,6 @@ class Core {
   }
 
   createShetou() {
-    const that = this;
     const container = new Container();
     this.renderer.stage.addChild(container);
     this.shetou = Sprite.from(Apple);
@@ -99,67 +104,81 @@ class Core {
     this.shetou.x = 0;
     this.shetou.y = 0;
     container.addChild(this.shetou);
+    this.move();
+    this.state = this.play;
+    this.renderer.ticker.add((delta: any) => this.gameLoop(delta));
   }
 
   gameLoop(delta: number) {
     this.play(delta);
   }
 
-  play(delta: any) {
-    this.shetou.x += this.speed;
-    this.shetou.y += 
+  play(_delta: any) {
+    const { speedX,speedY } = this.speed
+    this.shetou.x += speedX;
+    this.shetou.y += speedY;
   }
 
   move(){
-
-    const {speedY,speedX} = this.speed;
     let left = keyboard("ArrowLeft"),
       up = keyboard("ArrowUp"),
       right = keyboard("ArrowRight"),
       down = keyboard("ArrowDown");
 
       left.press = () => {
-        speedY = -5;
-        speedX = 0;
+        const action = {
+          speedX:-5,
+          speedY:0
+        }
+        this.speed = action
       };
 
       left.release = () => {
-        if (!right.isDown && speedY === 0) {
-          speedX = 0;
+        if (!right.isDown && this.speed.speedY === 0) {
+          this.speed.speedX = 0;
         }
       };
 
       up.press = () => {
-        speedY = -5;
-        speedX = 0;
+        const action = {
+          speedY:-5,
+          speedX:0
+        }
+        this.speed = action
       };
 
       up.release = () => {
-        if (!down.isDown && speedX === 0) {
-          speedY = 0;
+        if (!down.isDown && this.speed.speedX === 0) {
+          this.speed.speedY = 0;
         }
       };
 
        //Right
       right.press = () => {
-        speedX = 5;
-        speedY = 0;
+        const action = {
+          speedX:5,
+          speedY:0
+        }
+        this.speed = action
       };
 
       right.release = () => {
-        if (!left.isDown && speedY === 0) {
-          speedX = 0;
+        if (!left.isDown && this.speed.speedY === 0) {
+          this.speed.speedX = 0;
         }
       };
     
       //Down
       down.press = () => {
-        speedY = 5;
-        speedX = 0;
+        const action = {
+          speedY:5,
+          speedX:0
+        }
+        this.speed = action
       };
       down.release = () => {
-        if (!up.isDown && speedX === 0) {
-          speedY = 0;
+        if (!up.isDown && this.speed.speedX === 0) {
+          this.speed.speedY = 0;
         }
       };
     

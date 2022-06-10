@@ -19,16 +19,17 @@ const keyboard = (value:string) => {
     isUp: true,
     press: undefined,
     release: undefined,
-     //The `downHandler`
+    
     downHandler: event => {
       if (event.key === key.value) {
-        if (key.isUp && key.press) key.press();
+        if (key.isUp && key.press) 
+        key.press();
         key.isDown = true;
         key.isUp = false;
         event.preventDefault();
       }
     },
-       //The `upHandler`
+
     upHandler: event => {
       if (event.key === key.value) {
         if (key.isDown && key.release) key.release();
@@ -37,14 +38,13 @@ const keyboard = (value:string) => {
         event.preventDefault();
       }
     },
-    // Detach event listeners
+
     unsubscribe: () => {
       window.removeEventListener("keydown", downListener);
       window.removeEventListener("keyup", upListener);
     }
   };
-
-  //Attach event listeners
+  console.log(value);
   const downListener = key.downHandler.bind(key);
   const upListener = key.upHandler.bind(key);
   
