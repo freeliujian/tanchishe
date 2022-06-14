@@ -5,9 +5,9 @@ import {
   Loader,
   Graphics,
   Text,
-  TextStyle
+  TextStyle,
+  ParticleContainer,
 } from "pixi.js";
-import { Shetou, ShetouProps } from "./shetou";
 import { keyboard } from "./keyboard";
 import Apple from "./assets/apple.jpg";
 
@@ -32,23 +32,24 @@ class Core {
   isLoader?: boolean;
   isVisible: boolean;
   speed: SpeedProps;
-  state: any;
-  shetou: any;
-  sheshen: any[];
+  snake: any;
   apple?: any;
   wallArr?: any;
+  state: any;
+  score:number;
 
   constructor(option: CoreProps) {
     const { element, width, height, isLoader = false } = option;
-    this.element = document.querySelector(`#${element}`); 
+    this.element = document.querySelector(`#${element}`);
     this.width = width;
     this.height = height;
     this.isLoader = isLoader;
-    this.sheshen = [0, 0, 0];
+    this.snake = null;
+    this.apple = null;
+    this.score = 0;
     this.isVisible = true;
     this.renderer = null;
     this.init();
-    
   }
 
   init() {
@@ -64,9 +65,9 @@ class Core {
       height: this.height as number,
       backgroundColor: 0xffffff,
     });
+    this.getScore();
     this.createRender();
   }
-
 
   loaderImg(option: {
     imgUrl: string;
@@ -80,63 +81,74 @@ class Core {
   createRender() {
     this.renderer.stage.removeChildren();
     this.element?.appendChild(this.renderer.view);
-    console.log(this.renderer.stage)
-    if(this.isVisible){
+    if (this.isVisible) {
       this.createWalls();
       this.createApple();
-      this.createShetou();
-
-    }else {
-
+      this.createSnake();
+    } else {
       this.startPage();
     }
   }
 
-  startPage(){
+  getScore() {
+    const body = document.body;
+    const scoreWrapper = document.createElement('div');
+    scoreWrapper.innerHTML = `
+      <span>分数：</span><span id="Score">0</span>
+    `
+    body.appendChild(scoreWrapper);
+  }
 
-    const {width,height} = this;
+  setScore() {
+    this.score ++;
+    const Score = document.querySelector('#Score');
+    Score.innerHTML = `${this.score}`;
+  }
+
+  startPage() {
+    const { width, height } = this;
     const startContainer = new Container();
     const graphics = new Graphics();
     graphics.beginFill(0x000000);
-    graphics.drawRect(0,0,width as number,height as number);
+    graphics.drawRect(0, 0, width as number, height as number);
     graphics.endFill();
     startContainer.addChild(graphics);
     const style = new TextStyle({
       fontFamily: "Arial",
       fontSize: 36,
       fill: "white",
-      stroke: '#ff3300',
+      stroke: "#ff3300",
       strokeThickness: 4,
       dropShadow: true,
       dropShadowColor: "#cccccc",
       dropShadowBlur: 4,
       dropShadowAngle: Math.PI / 6,
       dropShadowDistance: 6,
-    }); 
-    const message = new Text('贪吃蛇（乞丐版）',style);
-    message.position.set(width as number/3,height as number/4)
+    });
+    const message = new Text("贪吃蛇（乞丐版）", style);
+    message.position.set((width as number) / 3, (height as number) / 4);
     startContainer.addChild(message);
     const border = new Graphics();
     border.beginFill(0xcccccc);
     border.lineStyle({ color: 0xffffff, width: 4, alignment: 0 });
-    border.drawRect(0,0,120,60);
+    border.drawRect(0, 0, 120, 60);
     border.endFill();
-    border.position.set(this.width as number/2.5,height as number/2)
+    border.position.set((this.width as number) / 2.5, (height as number) / 2);
     startContainer.addChild(border);
-    const button = new Text('游戏开始');
-    console.log(border)
+    const button = new Text("游戏开始");
     border.interactive = true;
-    border.on('pointerdown', e => {
-     
+    border.on("pointerdown", (e) => {
       this.isVisible = true;
       this.createRender();
     });
-    button.position.set(this.width as number/2.45,height as number/1.9)
-    startContainer.addChild(button)
+    button.position.set(
+      (this.width as number) / 2.45,
+      (height as number) / 1.9
+    );
+    startContainer.addChild(button);
 
     this.renderer.stage.addChild(startContainer);
-
-  };
+  }
 
   createWalls() {
     console.log("created Wall");
@@ -182,39 +194,37 @@ class Core {
   }
 
   createApple() {
-    const container = new Container();
-    this.renderer.stage.addChild(container);
-    this.apple = Sprite.from(Apple);
-    this.apple.width = 25;
-    this.apple.height = 30;
-    this.apple.position.set(10, 200);
-    container.addChild(this.apple);
+    const { width, height } = this;
+    this.apple = new Container();
+    this.renderer.stage.addChild(this.apple);
+    const sprite = Sprite.from(Apple);
+    sprite.width = 25;
+    sprite.height = 30;
+    this.apple.position.set(
+      Math.floor(Math.random() * (width as number)),
+      Math.floor(Math.random() * (height as number))
+    );
+    this.apple.addChild(sprite);
   }
 
-  createShetou() {
-    const shetouOption = {
+  createSnake() {
+    const snakeOption = {
       x: 10,
       y: 100,
       width: 25,
       height: 30,
     };
 
-    const container = new Container();
-    this.renderer.stage.addChild(container);
-    this.shetou = Sprite.from(Apple);
-    this.shetou.width = shetouOption.width;
-    this.shetou.height = shetouOption.height;
-    this.shetou.position.set(shetouOption.x, shetouOption.y);
-    // this.sheshen.forEach((item,index) => {
-
-    //   let sheshen = Sprite.from(Apple);
-    //   sheshen.width = shetouOption.width;
-    //   sheshen.height = shetouOption.height;
-    //   sheshen.position.set(shetouOption.x, shetouOption.y - shetouOption.width);
-    //   container.addChild(sheshen);
-    // })
-
-    container.addChild(this.shetou);
+    this.snake = new ParticleContainer();
+    this.snake.position.set(10, 10);
+    this.renderer.stage.addChild(this.snake);
+    for (let i = 0; i < 1; i++) {
+      let sprite = Sprite.from(Apple);
+      sprite.width = snakeOption.width;
+      sprite.height = snakeOption.height;
+      this.snake.addChild(sprite);
+    }
+    console.log(this.snake);
     this.move();
     this.state = this.play;
     this.renderer.ticker.add((delta: any) => this.gameLoop(delta));
@@ -225,32 +235,33 @@ class Core {
   }
 
   play(_delta: any) {
-    const { speed, shetou, apple, wallArr, hitTestRectangle } = this;
+    const { speed, snake, apple, wallArr, hitTestRectangle } = this;
     const { speedX, speedY } = speed;
     const { leftWall, rightWall, topWall, bottomWall, wall } = wallArr;
-    shetou.x += speedX;
-    shetou.y += speedY;
+    snake.x += speedX;
+    snake.y += speedY;
 
-    if (hitTestRectangle(shetou, apple)) {
-      console.log("你碰到了苹果");
-
+    if (hitTestRectangle(snake, apple)) {
+      this.apple.removeChildren();
+      this.createApple();
+      this.setScore();
     }
-    if (hitTestRectangle(shetou, leftWall)) {
+    if (hitTestRectangle(snake, leftWall)) {
       this.over();
     }
-    if (hitTestRectangle(shetou, rightWall)) {
+    if (hitTestRectangle(snake, rightWall)) {
       this.over();
     }
-    if (hitTestRectangle(shetou, topWall)) {
+    if (hitTestRectangle(snake, topWall)) {
       this.over();
     }
-    if (hitTestRectangle(shetou, bottomWall)) {
+    if (hitTestRectangle(snake, bottomWall)) {
       this.over();
     }
   }
 
   over() {
-    console.log('game over');
+    console.log("game over");
   }
 
   move() {
@@ -267,11 +278,11 @@ class Core {
       this.speed = action;
     };
 
-    // left.release = () => {
-    //   if (!right.isDown && this.speed.speedY === 0) {
-    //     this.speed.speedX = 0;
-    //   }
-    // };
+    left.release = () => {
+      if (!right.isDown && this.speed.speedY === 0) {
+        this.speed.speedX = 0;
+      }
+    };
 
     up.press = () => {
       const action = {
@@ -281,11 +292,11 @@ class Core {
       this.speed = action;
     };
 
-    // up.release = () => {
-    //   if (!down.isDown && this.speed.speedX === 0) {
-    //     this.speed.speedY = 0;
-    //   }
-    // };
+    up.release = () => {
+      if (!down.isDown && this.speed.speedX === 0) {
+        this.speed.speedY = 0;
+      }
+    };
 
     //Right
     right.press = () => {
@@ -296,11 +307,11 @@ class Core {
       this.speed = action;
     };
 
-    // right.release = () => {
-    //   if (!left.isDown && this.speed.speedY === 0) {
-    //     this.speed.speedX = 0;
-    //   }
-    // };
+    right.release = () => {
+      if (!left.isDown && this.speed.speedY === 0) {
+        this.speed.speedX = 0;
+      }
+    };
 
     //Down
     down.press = () => {
@@ -310,11 +321,12 @@ class Core {
       };
       this.speed = action;
     };
-    // down.release = () => {
-    //   if (!up.isDown && this.speed.speedX === 0) {
-    //     this.speed.speedY = 0;
-    //   }
-    // };
+
+    down.release = () => {
+      if (!up.isDown && this.speed.speedX === 0) {
+        this.speed.speedY = 0;
+      }
+    };
   }
 
   hitTestRectangle(r1: any, r2: any) {
