@@ -36,7 +36,7 @@ class Core {
   apple?: any;
   wallArr?: any;
   state: any;
-  score:number;
+  score: number;
 
   constructor(option: CoreProps) {
     const { element, width, height, isLoader = false } = option;
@@ -47,7 +47,7 @@ class Core {
     this.snake = null;
     this.apple = null;
     this.score = 0;
-    this.isVisible = true;
+    this.isVisible = false;
     this.renderer = null;
     this.init();
   }
@@ -92,21 +92,40 @@ class Core {
 
   getScore() {
     const body = document.body;
-    const scoreWrapper = document.createElement('div');
+    const scoreWrapper = document.createElement("div");
     scoreWrapper.innerHTML = `
       <span>分数：</span><span id="Score">0</span>
-    `
+    `;
     body.appendChild(scoreWrapper);
+
   }
 
   setScore() {
-    this.score ++;
-    const Score = document.querySelector('#Score');
+    this.score++;
+    const Score = document.querySelector("#Score");
     Score.innerHTML = `${this.score}`;
   }
 
+  over() {
+    this.renderer.stage.removeChildren();
+    this.endPage();
+  }
+  endPage() {
+    const { width, height,renderer,score } = this;
+    const graphics = new Graphics();
+    graphics.beginFill(0x000000);
+    graphics.drawRect(0, 0, width as number, height as number);
+    graphics.endFill();
+    renderer.stage.addChild(graphics);
+
+    const endText = new Text(`游戏结束，你的分数为:${score}`,new TextStyle({
+      fill:0xcccccc,
+    }));
+    renderer.stage.addChild(endText);
+  }
+
   startPage() {
-    const { width, height } = this;
+    const { width, height,renderer } = this;
     const startContainer = new Container();
     const graphics = new Graphics();
     graphics.beginFill(0x000000);
@@ -142,12 +161,12 @@ class Core {
       this.createRender();
     });
     button.position.set(
-      (this.width as number) / 2.45,
+      (width as number) / 2.45,
       (height as number) / 1.9
     );
     startContainer.addChild(button);
 
-    this.renderer.stage.addChild(startContainer);
+    renderer.stage.addChild(startContainer);
   }
 
   createWalls() {
@@ -237,7 +256,7 @@ class Core {
   play(_delta: any) {
     const { speed, snake, apple, wallArr, hitTestRectangle } = this;
     const { speedX, speedY } = speed;
-    const { leftWall, rightWall, topWall, bottomWall, wall } = wallArr;
+    const { leftWall, rightWall, topWall, bottomWall } = wallArr;
     snake.x += speedX;
     snake.y += speedY;
 
@@ -260,10 +279,6 @@ class Core {
     }
   }
 
-  over() {
-    console.log("game over");
-  }
-
   move() {
     let left = keyboard("ArrowLeft"),
       up = keyboard("ArrowUp"),
@@ -278,11 +293,11 @@ class Core {
       this.speed = action;
     };
 
-    left.release = () => {
-      if (!right.isDown && this.speed.speedY === 0) {
-        this.speed.speedX = 0;
-      }
-    };
+    // left.release = () => {
+    //   if (!right.isDown && this.speed.speedY === 0) {
+    //     this.speed.speedX = 0;
+    //   }
+    // };
 
     up.press = () => {
       const action = {
@@ -292,11 +307,11 @@ class Core {
       this.speed = action;
     };
 
-    up.release = () => {
-      if (!down.isDown && this.speed.speedX === 0) {
-        this.speed.speedY = 0;
-      }
-    };
+    // up.release = () => {
+    //   if (!down.isDown && this.speed.speedX === 0) {
+    //     this.speed.speedY = 0;
+    //   }
+    // };
 
     //Right
     right.press = () => {
@@ -307,11 +322,11 @@ class Core {
       this.speed = action;
     };
 
-    right.release = () => {
-      if (!left.isDown && this.speed.speedY === 0) {
-        this.speed.speedX = 0;
-      }
-    };
+    // right.release = () => {
+    //   if (!left.isDown && this.speed.speedY === 0) {
+    //     this.speed.speedX = 0;
+    //   }
+    // };
 
     //Down
     down.press = () => {
@@ -322,11 +337,11 @@ class Core {
       this.speed = action;
     };
 
-    down.release = () => {
-      if (!up.isDown && this.speed.speedX === 0) {
-        this.speed.speedY = 0;
-      }
-    };
+    // down.release = () => {
+    //   if (!up.isDown && this.speed.speedX === 0) {
+    //     this.speed.speedY = 0;
+    //   }
+    // };
   }
 
   hitTestRectangle(r1: any, r2: any) {
