@@ -32,12 +32,14 @@ class Core {
   isLoader?: boolean;
   isVisible: boolean;
   speed: SpeedProps;
-  snake: any;
+  snake?: any;
+  snakeArr?: any[];
+  snakeArr2?: any[];
   apple?: any;
   wallArr?: any;
   state: any;
   score: number;
-  sheshens:any;
+
   constructor(option: CoreProps) {
     const { element, width, height, isLoader = false } = option;
     this.element = document.querySelector(`#${element}`);
@@ -45,11 +47,12 @@ class Core {
     this.height = height;
     this.isLoader = isLoader;
     this.snake = null;
+    this.snakeArr = [{}, {}, {}];
+    this.snakeArr2 = [];
     this.apple = null;
     this.score = 0;
     this.isVisible = true;
     this.renderer = null;
-    this.sheshens = null;
     this.init();
   }
 
@@ -86,7 +89,6 @@ class Core {
       this.createWalls();
       this.createApple();
       this.createSnake();
-      this.sheshen();
     } else {
       this.startPage();
     }
@@ -99,7 +101,6 @@ class Core {
       <span>分数：</span><span id="Score">0</span>
     `;
     body.appendChild(scoreWrapper);
-
   }
 
   setScore() {
@@ -113,21 +114,24 @@ class Core {
     this.endPage();
   }
   endPage() {
-    const { width, height,renderer,score } = this;
+    const { width, height, renderer, score } = this;
     const graphics = new Graphics();
     graphics.beginFill(0x000000);
     graphics.drawRect(0, 0, width as number, height as number);
     graphics.endFill();
     renderer.stage.addChild(graphics);
 
-    const endText = new Text(`游戏结束，你的分数为:${score}`,new TextStyle({
-      fill:0xcccccc,
-    }));
+    const endText = new Text(
+      `游戏结束，你的分数为:${score}`,
+      new TextStyle({
+        fill: 0xcccccc,
+      })
+    );
     renderer.stage.addChild(endText);
   }
 
   startPage() {
-    const { width, height,renderer } = this;
+    const { width, height, renderer } = this;
     const startContainer = new Container();
     const graphics = new Graphics();
     graphics.beginFill(0x000000);
@@ -162,10 +166,7 @@ class Core {
       this.isVisible = true;
       this.createRender();
     });
-    button.position.set(
-      (width as number) / 2.45,
-      (height as number) / 1.9
-    );
+    button.position.set((width as number) / 2.45, (height as number) / 1.9);
     startContainer.addChild(button);
 
     renderer.stage.addChild(startContainer);
@@ -200,7 +201,7 @@ class Core {
     const bottomWall = new Graphics();
     bottomWall.beginFill(0xde3249);
     bottomWall.drawRect(0, 0, this.width as number, 10);
-    topWall.position.set(0, (this.height as number) - 10);
+    bottomWall.position.set(0, (this.height as number) - 10);
     bottomWall.endFill();
 
     this.wallArr = {
@@ -236,39 +237,22 @@ class Core {
       height: 30,
     };
 
-    this.snake = new ParticleContainer();
+    this.snake = new Container();
     this.snake.position.set(10, 10);
     this.renderer.stage.addChild(this.snake);
-    for (let i = 0; i < 1; i++) {
-      let sprite = Sprite.from(Apple);
-      sprite.width = snakeOption.width;
-      sprite.height = snakeOption.height;
-      sprite.position.set(snakeOption.x - 10,snakeOption.height - 10)
-      this.snake.addChild(sprite);
+    for (let i = 1; i <= this.snakeArr.length; i++) {
+      let snake = new Graphics();
+      snake.beginFill(0x000000);
+      snake.drawRect(27 * i, 27, 25, 25);
+      snake.endFill();
+      this.snakeArr2.push(snake);
+      this.renderer.stage.addChild(snake);
     }
-    
     this.move();
     this.state = this.play;
     this.renderer.ticker.add((delta: any) => {
-
-      
-      this.gameLoop(delta)
+      this.gameLoop(delta);
     });
-  }
-
-
-  sheshen(){
-    const { width, height } = this;
-    this.sheshens= new Container();
-    this.renderer.stage.addChild( this.sheshens);
-    const sprite = Sprite.from(Apple);
-    sprite.width = 25;
-    sprite.height = 30;
-    this.apple.position.set(
-      10,10
-    );
-     this.sheshens.position.set(10,0)
-     this.sheshens.addChild(sprite);
   }
 
   gameLoop(delta: number) {
@@ -279,13 +263,9 @@ class Core {
     const { speed, snake, apple, wallArr, hitTestRectangle } = this;
     const { speedX, speedY } = speed;
     const { leftWall, rightWall, topWall, bottomWall } = wallArr;
-      
 
-    snake.x += speedX;
-    snake.y += speedY;
-
-    //  this.sheshens.x = snake.x;
-    //  this.sheshens.y += snake.y
+    // snake.x += speedX;
+    // snake.y += speedY;
 
     if (hitTestRectangle(snake, apple)) {
       this.apple.removeChildren();
@@ -305,40 +285,11 @@ class Core {
       this.over();
     }
   }
-
   move() {
     let left = keyboard("ArrowLeft"),
       up = keyboard("ArrowUp"),
       right = keyboard("ArrowRight"),
       down = keyboard("ArrowDown");
-
-    left.press = () => {
-      const action = {
-        speedX: -5,
-        speedY: 0,
-      };
-      this.speed = action;
-    };
-
-    left.release = () => {
-      if (!right.isDown && this.speed.speedY === 0) {
-        this.speed.speedX = 0;
-      }
-    };
-
-    up.press = () => {
-      const action = {
-        speedY: -5,
-        speedX: 0,
-      };
-      this.speed = action;
-    };
-
-    up.release = () => {
-      if (!down.isDown && this.speed.speedX === 0) {
-        this.speed.speedY = 0;
-      }
-    };
 
     //Right
     right.press = () => {
@@ -351,12 +302,13 @@ class Core {
 
     right.release = () => {
       if (!left.isDown && this.speed.speedY === 0) {
+        console.log(this.snakeArr2);
         this.speed.speedX = 0;
       }
     };
 
-    //Down
-    down.press = () => {
+     //Down
+     down.press = () => {
       const action = {
         speedY: 5,
         speedX: 0,
@@ -369,8 +321,36 @@ class Core {
         this.speed.speedY = 0;
       }
     };
-  }
 
+    // left.press = () => {
+    //   const action = {
+    //     speedX: -5,
+    //     speedY: 0,
+    //   };
+    //   this.speed = action;
+    // };
+
+    // left.release = () => {
+    //   if (!right.isDown && this.speed.speedY === 0) {
+    //     this.speed.speedX = 0;
+    //   }
+    // };
+
+    // up.press = () => {
+    //   const action = {
+    //     speedY: -5,
+    //     speedX: 0,
+    //   };
+    //   this.speed = action;
+    // };
+
+    // up.release = () => {
+    //   if (!down.isDown && this.speed.speedX === 0) {
+    //     this.speed.speedY = 0;
+    //   }
+    // };
+
+  }
   hitTestRectangle(r1: any, r2: any) {
     let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
 
