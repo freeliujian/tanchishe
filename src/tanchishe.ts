@@ -23,6 +23,13 @@ interface SpeedProps {
   speedY?: number;
 }
 
+interface snakeAxisProps {
+  x:number
+  y:number
+  width:number
+  height:number
+}
+
 class Core {
   element: Element;
   width: string | number;
@@ -54,9 +61,7 @@ class Core {
     this.renderer = null;
     this.isInitSnake = true;
 
-
     this.init();
-   
   }
 
   init() {
@@ -116,6 +121,7 @@ class Core {
     this.renderer.stage.removeChildren();
     this.endPage();
   }
+  
   endPage() {
     const { width, height, renderer, score } = this;
     const graphics = new Graphics();
@@ -239,7 +245,7 @@ class Core {
       this.snake.position.set(10, 10);
       this.renderer.stage.addChild(this.snake);
     }
-    if(this.snake.children.length !== 0){
+    if (this.snake.children.length !== 0) {
       // console.log('~~~ removeSprite ~~~~');
       this.snake.removeChildren();
     }
@@ -252,7 +258,12 @@ class Core {
         snake.position.set(27 * i, 27);
         snake.endFill();
         this.snake.addChild(snake);
-        this.snakeArr.push({ x: snake.x, y: snake.y,width:snake.width,height:snake.height });
+        this.snakeArr.push({
+          x: snake.x,
+          y: snake.y,
+          width: snake.width,
+          height: snake.height,
+        });
       }
       this.isInitSnake = false;
     } else {
@@ -263,7 +274,6 @@ class Core {
         snake.drawRect(0, 0, 25, 25);
         snake.position.set(this.snakeArr[i].x, this.snakeArr[i].y);
         snake.endFill();
-    
         this.snake.addChild(snake);
       }
     }
@@ -273,14 +283,20 @@ class Core {
     this.initSnake();
     this.move();
     this.state = this.play;
-    
+
     // 每秒帧数
-    // this.renderer.ticker.add((delta: any) => {
-    //   this.gameLoop(delta);
-    // });
-    setInterval(()=>{
-      this.state();
-    },3000)
+    this.renderer.ticker.add((delta: any) => {
+      this.gameLoop(delta);
+    });
+  }
+
+  addSnake({x,y,width,height}:snakeAxisProps) {
+    this.snakeArr.unshift({
+      x: x,
+      y: y,
+      width: width,
+      height: height,
+    });
   }
 
   gameLoop(delta: number) {
@@ -290,27 +306,44 @@ class Core {
   play(_delta?: any) {
     const { snakeArr, apple, wallArr, hitTestRectangle } = this;
     const { leftWall, rightWall, topWall, bottomWall } = wallArr;
-    console.log(snakeArr);
     const snakeHead = snakeArr[snakeArr.length - 1];
-    console.log(snakeHead)
+    const snakeLast = snakeArr[0];
+
     if (hitTestRectangle(snakeHead, apple)) {
       this.apple.removeChildren();
       this.createApple();
       this.setScore();
+      this.addSnake({...snakeLast,x:snakeLast.x - 27});
     }
-    // if (hitTestRectangle(snake, leftWall)) {
-    //   this.over();
-    // }
-    // if (hitTestRectangle(snake, rightWall)) {
-    //   this.over();
-    // }
-    // if (hitTestRectangle(snake, topWall)) {
-    //   this.over();
-    // }
-    // if (hitTestRectangle(snake, bottomWall)) {
-    //   this.over();
-    // }
+    if (hitTestRectangle(snakeHead, leftWall)) {
+      this.over();
+    }
+    if (hitTestRectangle(snakeHead, rightWall)) {
+      this.over();
+    }
+    if (hitTestRectangle(snakeHead, topWall)) {
+      this.over();
+    }
+    if (hitTestRectangle(snakeHead, bottomWall)) {
+      this.over();
+    }
   }
+
+  snakeMove({ x, y, width , height } : snakeAxisProps) {
+    this.snakeArr.shift();
+    this.snakeArr.push({
+      x: x,
+      y: y,
+      width: width,
+      height: height,
+      centerX: x + width / 2,
+      centerY: y + width / 2,
+      halfWidth: width / 2,
+      halfHeight: height / 2,
+    });
+    this.initSnake();
+  }
+
   move() {
     let left = keyboard("ArrowLeft"),
       up = keyboard("ArrowUp"),
@@ -330,9 +363,7 @@ class Core {
       if (!left.isDown) {
         const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
         const { x, y, width, height } = lastChildSprite;
-        this.snakeArr.shift();
-        this.snakeArr.push({ x: x + 27, y: y ,width:width, height:height,centerX:x + 27 + width/2,centerY:y + 27 + width/2,halfWidth:width/2,halfHeight:height/2 });
-        this.initSnake();
+        this.snakeMove({x:x + 27, y, width, height});
       }
     };
 
@@ -348,10 +379,8 @@ class Core {
     down.release = () => {
       if (!up.isDown) {
         const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-        const { x, y } = lastChildSprite;
-        this.snakeArr.shift();
-        this.snakeArr.push({ x: x , y: y + 27});
-        this.initSnake();
+        const { x, y, width, height } = lastChildSprite;
+        this.snakeMove({x, y:y+27, width, height});
       }
     };
 
@@ -366,10 +395,8 @@ class Core {
     left.release = () => {
       if (!right.isDown && this.speed.speedY === 0) {
         const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-        const { x, y } = lastChildSprite;
-        this.snakeArr.shift();
-        this.snakeArr.push({ x: x -27, y: y });
-        this.initSnake();
+        const { x, y, width, height } = lastChildSprite;
+        this.snakeMove({x:x-27, y, width, height});
       }
     };
 
@@ -384,10 +411,8 @@ class Core {
     up.release = () => {
       if (!down.isDown && this.speed.speedX === 0) {
         const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-        const { x, y } = lastChildSprite;
-        this.snakeArr.shift();
-        this.snakeArr.push({ x: x, y: y -27});
-        this.initSnake();
+        const { x, y, width, height } = lastChildSprite;
+        this.snakeMove({x, y:y-27, width, height});
       }
     };
   }
@@ -405,8 +430,7 @@ class Core {
     r1.halfHeight = r1.height / 2;
     r2.halfWidth = r2.width / 2;
     r2.halfHeight = r2.height / 2;
-    console.log(r1);
-    console.log(r2);
+
     vx = r1.centerX - r2.centerX;
     vy = r1.centerY - r2.centerY;
 
