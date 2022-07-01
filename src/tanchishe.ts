@@ -7,6 +7,8 @@ import {
   Text,
   TextStyle,
   ParticleContainer,
+  Texture,
+  TilingSprite,
 } from "pixi.js";
 import { keyboard } from "./keyboard";
 import Apple from "./assets/apple.jpg";
@@ -18,16 +20,11 @@ interface CoreProps {
   isLoader?: boolean;
 }
 
-interface SpeedProps {
-  speedX?: number;
-  speedY?: number;
-}
-
 interface snakeAxisProps {
-  x:number
-  y:number
-  width:number
-  height:number
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
 }
 
 class Core {
@@ -38,7 +35,7 @@ class Core {
   loader!: any;
   isLoader?: boolean;
   isVisible: boolean;
-  speed: SpeedProps;
+  speed: snakeAxisProps;
   snake?: any;
   snakeArr?: any[];
   apple?: any;
@@ -60,7 +57,7 @@ class Core {
     this.isVisible = true;
     this.renderer = null;
     this.isInitSnake = true;
-
+    this.speed = {};
     this.init();
   }
 
@@ -68,10 +65,6 @@ class Core {
     console.log("init");
     this.apple = null;
     this.wallArr = null;
-    this.speed = {
-      speedY: 0,
-      speedX: 0,
-    };
     this.renderer = new Application({
       width: this.width as number,
       height: this.height as number,
@@ -121,7 +114,7 @@ class Core {
     this.renderer.stage.removeChildren();
     this.endPage();
   }
-  
+
   endPage() {
     const { width, height, renderer, score } = this;
     const graphics = new Graphics();
@@ -232,8 +225,8 @@ class Core {
     sprite.width = 25;
     sprite.height = 30;
     this.apple.position.set(
-      Math.floor(Math.random() * (width as number)),
-      Math.floor(Math.random() * (height as number))
+      Math.floor(Math.random() * (width as number) * 0.8),
+      Math.floor(Math.random() * (height as number) * 0.8)
     );
     this.apple.addChild(sprite);
   }
@@ -290,7 +283,7 @@ class Core {
     });
   }
 
-  addSnake({x,y,width,height}:snakeAxisProps) {
+  addSnake({ x, y, width, height }: snakeAxisProps) {
     this.snakeArr.unshift({
       x: x,
       y: y,
@@ -309,11 +302,12 @@ class Core {
     const snakeHead = snakeArr[snakeArr.length - 1];
     const snakeLast = snakeArr[0];
 
+    
     if (hitTestRectangle(snakeHead, apple)) {
       this.apple.removeChildren();
       this.createApple();
       this.setScore();
-      this.addSnake({...snakeLast,x:snakeLast.x - 27});
+      this.addSnake({ ...snakeLast, x: snakeLast.x - 27 });
     }
     if (hitTestRectangle(snakeHead, leftWall)) {
       this.over();
@@ -329,7 +323,43 @@ class Core {
     }
   }
 
-  snakeMove({ x, y, width , height } : snakeAxisProps) {
+  snakeMove(dir: any) {
+    // const { x, y, width , height } = sprite;
+    const { upIsDown=true, leftIsDown=true, downIsDown=true, rightIsDown=true } = dir;
+    const direction = {
+      up: false,
+      left: false,
+      down: false,
+      right: false,
+    };
+    let sprite: snakeAxisProps = {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    };
+    const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
+  
+    if (!leftIsDown) {
+      console.log("right");
+      
+      sprite = { ...lastChildSprite, x: lastChildSprite.x + 27 };
+    }
+    // if (!rightIsDown) {
+    //   console.log('left');
+    //   sprite = { ...lastChildSprite, x: lastChildSprite.x - 27 };
+    // }
+    // if (!downIsDown) {
+    //   console.log('up');
+    //   sprite = { ...lastChildSprite, y: lastChildSprite.y - 27 };
+    // }
+    // if (!upIsDown) {
+    //   console.log('down');
+    //   sprite = { ...lastChildSprite, y: lastChildSprite.y + 27 };
+    // }
+
+    const { x, y, width, height } = sprite;
+
     this.snakeArr.shift();
     this.snakeArr.push({
       x: x,
@@ -352,69 +382,35 @@ class Core {
 
     //Right
     right.press = () => {
-      const action = {
-        speedX: 5,
-        speedY: 0,
-      };
-      this.speed = action;
+      const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
+      this.speed = { ...lastChildSprite, x: lastChildSprite.x + 27 };
+      console.log(this.speed);
     };
 
     right.release = () => {
-      if (!left.isDown) {
-        const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-        const { x, y, width, height } = lastChildSprite;
-        this.snakeMove({x:x + 27, y, width, height});
-      }
+      this.snakeMove({ upIsDown: true, leftIsDown: left.isDown, rightIsDown: true, downIsDown: true });
     };
+    // //Down
+    // down.press = () => {
+    // };
 
-    //Down
-    down.press = () => {
-      const action = {
-        speedY: 5,
-        speedX: 0,
-      };
-      this.speed = action;
-    };
+    // down.release = () => {
+    //   this.snakeMove({ upIsDown: up.isDown, leftIsDown: true, rightIsDown: true, downIsDown: true });
+    // };
 
-    down.release = () => {
-      if (!up.isDown) {
-        const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-        const { x, y, width, height } = lastChildSprite;
-        this.snakeMove({x, y:y+27, width, height});
-      }
-    };
+    // left.press = () => {
+    // };
 
-    left.press = () => {
-      const action = {
-        speedX: -5,
-        speedY: 0,
-      };
-      this.speed = action;
-    };
+    // left.release = () => {
+    //   this.snakeMove({ upIsDown: true, leftIsDown: true, rightIsDown: right.isDown, downIsDown: true });
+    // };
 
-    left.release = () => {
-      if (!right.isDown && this.speed.speedY === 0) {
-        const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-        const { x, y, width, height } = lastChildSprite;
-        this.snakeMove({x:x-27, y, width, height});
-      }
-    };
+    // up.press = () => {
+    // };
 
-    up.press = () => {
-      const action = {
-        speedY: -5,
-        speedX: 0,
-      };
-      this.speed = action;
-    };
-
-    up.release = () => {
-      if (!down.isDown && this.speed.speedX === 0) {
-        const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-        const { x, y, width, height } = lastChildSprite;
-        this.snakeMove({x, y:y-27, width, height});
-      }
-    };
+    // up.release = () => {
+    //   this.snakeMove({ upIsDown: true, leftIsDown: true, rightIsDown: true, downIsDown: down.isDown });
+    // };
   }
 
   hitTestRectangle(r1: any, r2: any) {
