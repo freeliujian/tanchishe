@@ -27,6 +27,13 @@ interface snakeAxisProps {
   height?: number;
 }
 
+interface directionProps {
+  upIsDown: boolean;
+  leftIsDown: boolean;
+  downIsDown: boolean;
+  rightIsDown: boolean;
+}
+
 class Core {
   element: Element;
   width: string | number;
@@ -38,11 +45,13 @@ class Core {
   speed: snakeAxisProps;
   snake?: any;
   snakeArr?: any[];
+  isInitSnake: boolean;
   apple?: any;
   wallArr?: any;
   state: any;
   score: number;
-  isInitSnake: boolean;
+  direction: directionProps;
+  timer:null | NodeJS.Timer
 
   constructor(option: CoreProps) {
     const { element, width, height, isLoader = false } = option;
@@ -54,9 +63,16 @@ class Core {
     this.snakeArr = [];
     this.apple = null;
     this.score = 0;
-    this.isVisible = true;
+    this.isVisible = false;
     this.renderer = null;
     this.isInitSnake = true;
+    this.direction = {
+      upIsDown: true,
+      leftIsDown: true,
+      downIsDown: true,
+      rightIsDown: true,
+    };
+    this.timer = null;
     this.speed = {};
     this.init();
   }
@@ -86,10 +102,15 @@ class Core {
   createRender() {
     this.renderer.stage.removeChildren();
     this.element?.appendChild(this.renderer.view);
+    console.log(this.isVisible);
     if (this.isVisible) {
       this.createWalls();
       this.createSnake();
       this.createApple();
+      //移动蛇
+      this.timer = setInterval(()=>{
+        this.snakeMove();
+      },1000)
     } else {
       this.startPage();
     }
@@ -112,6 +133,7 @@ class Core {
 
   over() {
     this.renderer.stage.removeChildren();
+    clearInterval(this.timer);
     this.endPage();
   }
 
@@ -302,7 +324,6 @@ class Core {
     const snakeHead = snakeArr[snakeArr.length - 1];
     const snakeLast = snakeArr[0];
 
-    
     if (hitTestRectangle(snakeHead, apple)) {
       this.apple.removeChildren();
       this.createApple();
@@ -323,54 +344,47 @@ class Core {
     }
   }
 
-  snakeMove(dir: any) {
-    // const { x, y, width , height } = sprite;
-    const { upIsDown=true, leftIsDown=true, downIsDown=true, rightIsDown=true } = dir;
-    const direction = {
-      up: false,
-      left: false,
-      down: false,
-      right: false,
-    };
-    let sprite: snakeAxisProps = {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-    };
-    const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
+  snakeMove(dir?: any) {
+    const {
+      upIsDown,
+      leftIsDown,
+      downIsDown,
+      rightIsDown,
+    } = this.direction;
+    if (!(this.snake.children.length === 0 && this.isInitSnake) && (!upIsDown || !leftIsDown || !downIsDown || !rightIsDown)) {
+      const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
+      if (!rightIsDown) {
+        console.log('left');
+        this.speed = { ...lastChildSprite, x: lastChildSprite.x - 27 };
+      }
+      if (!downIsDown) {
+        console.log('up');
+        this.speed = { ...lastChildSprite, y: lastChildSprite.y - 27 };
+      }
+      if (!leftIsDown) {
+        console.log("right");
+        this.speed = { ...lastChildSprite, x: lastChildSprite.x + 27 };
+      }
+      if (!upIsDown) {
+        console.log('down');
+        this.speed = { ...lastChildSprite, y: lastChildSprite.y + 27  };
+      }
   
-    if (!leftIsDown) {
-      console.log("right");
-      
-      sprite = { ...lastChildSprite, x: lastChildSprite.x + 27 };
-    }
-    // if (!rightIsDown) {
-    //   console.log('left');
-    //   sprite = { ...lastChildSprite, x: lastChildSprite.x - 27 };
-    // }
-    // if (!downIsDown) {
-    //   console.log('up');
-    //   sprite = { ...lastChildSprite, y: lastChildSprite.y - 27 };
-    // }
-    // if (!upIsDown) {
-    //   console.log('down');
-    //   sprite = { ...lastChildSprite, y: lastChildSprite.y + 27 };
-    // }
+      const { x, y, width, height } = this.speed;
+  
+      this.snakeArr.shift();
+      this.snakeArr.push({
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        centerX: x + width / 2,
+        centerY: y + width / 2,
+        halfWidth: width / 2,
+        halfHeight: height / 2,
+      });
+    };
 
-    const { x, y, width, height } = sprite;
-
-    this.snakeArr.shift();
-    this.snakeArr.push({
-      x: x,
-      y: y,
-      width: width,
-      height: height,
-      centerX: x + width / 2,
-      centerY: y + width / 2,
-      halfWidth: width / 2,
-      halfHeight: height / 2,
-    });
     this.initSnake();
   }
 
@@ -380,37 +394,21 @@ class Core {
       right = keyboard("ArrowRight"),
       down = keyboard("ArrowDown");
 
-    //Right
-    right.press = () => {
-      const lastChildSprite = this.snakeArr[this.snakeArr.length - 1];
-      this.speed = { ...lastChildSprite, x: lastChildSprite.x + 27 };
-      console.log(this.speed);
-    };
-
     right.release = () => {
-      this.snakeMove({ upIsDown: true, leftIsDown: left.isDown, rightIsDown: true, downIsDown: true });
+      this.direction = { upIsDown: true, leftIsDown: left.isDown, rightIsDown: true, downIsDown: true };
     };
-    // //Down
-    // down.press = () => {
-    // };
 
-    // down.release = () => {
-    //   this.snakeMove({ upIsDown: up.isDown, leftIsDown: true, rightIsDown: true, downIsDown: true });
-    // };
+    down.release = () => {
+      this.direction = { upIsDown: up.isDown, leftIsDown: true, rightIsDown: true, downIsDown: true }
+    };
 
-    // left.press = () => {
-    // };
+    left.release = () => {
+      this.direction = { upIsDown: true, leftIsDown: true, rightIsDown: right.isDown, downIsDown: true };
+    };
 
-    // left.release = () => {
-    //   this.snakeMove({ upIsDown: true, leftIsDown: true, rightIsDown: right.isDown, downIsDown: true });
-    // };
-
-    // up.press = () => {
-    // };
-
-    // up.release = () => {
-    //   this.snakeMove({ upIsDown: true, leftIsDown: true, rightIsDown: true, downIsDown: down.isDown });
-    // };
+    up.release = () => {
+      this.direction = { upIsDown: true, leftIsDown: true, rightIsDown: true, downIsDown: down.isDown };
+    };
   }
 
   hitTestRectangle(r1: any, r2: any) {
