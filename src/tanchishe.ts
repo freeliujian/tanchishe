@@ -110,7 +110,7 @@ class Core {
       //移动蛇
       this.timer = setInterval(()=>{
         this.snakeMove();
-      },1000)
+      },100)
     } else {
       this.startPage();
     }
@@ -394,7 +394,7 @@ class Core {
       right = keyboard("ArrowRight"),
       down = keyboard("ArrowDown");
 
-    right.release = () => {
+    right.release = () => { 
       this.direction = { upIsDown: true, leftIsDown: left.isDown, rightIsDown: true, downIsDown: true };
     };
 
