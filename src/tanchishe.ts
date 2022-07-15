@@ -79,6 +79,7 @@ class Core {
 
   init() {
     console.log("init");
+
     this.apple = null;
     this.wallArr = null;
     this.renderer = new Application({
@@ -102,7 +103,7 @@ class Core {
   createRender() {
     this.renderer.stage.removeChildren();
     this.element?.appendChild(this.renderer.view);
-    console.log(this.isVisible);
+    this.isVisible = true;
     if (this.isVisible) {
       this.createWalls();
       this.createSnake();
@@ -110,7 +111,7 @@ class Core {
       //移动蛇
       this.timer = setInterval(()=>{
         this.snakeMove();
-      },100)
+      },200)
     } else {
       this.startPage();
     }
@@ -174,9 +175,10 @@ class Core {
       dropShadowAngle: Math.PI / 6,
       dropShadowDistance: 6,
     });
-    const message = new Text("贪吃蛇（乞丐版）", style);
+    const message = new Text("贪吃蛇（低配版）", style);
     message.position.set((width as number) / 3, (height as number) / 4);
     startContainer.addChild(message);
+
     const border = new Graphics();
     border.beginFill(0xcccccc);
     border.lineStyle({ color: 0xffffff, width: 4, alignment: 0 });
